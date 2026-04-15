@@ -1,0 +1,106 @@
+
+Open In Colab
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
+
+# =========================
+# 1. Upload File
+# =========================
+from google.colab import files
+uploaded = files.upload()   # upload your income.csv file here
+
+# Get uploaded filename
+file_name = list(uploaded.keys())[0]
+
+# =========================
+# 2. Load Dataset
+# =========================
+df = pd.read_csv(file_name)
+
+# =========================
+# 3. Handle Categorical Data
+# =========================
+for col in df.select_dtypes(include=['object']).columns:
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+
+# =========================
+# 4. Split Features & Target
+# =========================
+X = df.drop('income_level', axis=1)
+y = df['income_level']
+
+# =========================
+# 5. Train-Test Split
+# =========================
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# =========================
+# 6. Train Initial Model
+# =========================
+model = AdaBoostClassifier(n_estimators=10, random_state=42)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+print("Accuracy with 10 estimators:", accuracy_score(y_test, y_pred))
+
+# =========================
+# 7. Find Best n_estimators
+# =========================
+best_score = 0
+best_n = 0
+
+for n in range(10, 201, 10):
+    model = AdaBoostClassifier(n_estimators=n, random_state=42)
+    model.fit(X_train, y_train)
+
+    y_pred = model.predict(X_test)
+    score = accuracy_score(y_test, y_pred)
+
+    print(f"n_estimators={n} → Accuracy={score:.4f}")
+
+    if score > best_score:
+        best_score = score
+        best_n = n
+
+# =========================
+# 8. Final Result
+# =========================
+print("\nBest Accuracy:", best_score)
+print("Best n_estimators:", best_n)
+     
+Upload widget is only available when the cell has been executed in the current browser session. Please rerun this cell to enable.
+Saving income (2).csv to income (2).csv
+Accuracy with 10 estimators: 0.8182004299314157
+n_estimators=10 → Accuracy=0.8182
+n_estimators=20 → Accuracy=0.8244
+n_estimators=30 → Accuracy=0.8310
+n_estimators=40 → Accuracy=0.8314
+n_estimators=50 → Accuracy=0.8327
+n_estimators=60 → Accuracy=0.8328
+n_estimators=70 → Accuracy=0.8334
+n_estimators=80 → Accuracy=0.8335
+n_estimators=90 → Accuracy=0.8329
+n_estimators=100 → Accuracy=0.8328
+n_estimators=110 → Accuracy=0.8332
+n_estimators=120 → Accuracy=0.8330
+n_estimators=130 → Accuracy=0.8330
+n_estimators=140 → Accuracy=0.8328
+n_estimators=150 → Accuracy=0.8329
+n_estimators=160 → Accuracy=0.8332
+n_estimators=170 → Accuracy=0.8331
+n_estimators=180 → Accuracy=0.8331
+n_estimators=190 → Accuracy=0.8330
+n_estimators=200 → Accuracy=0.8332
+
+Best Accuracy: 0.8334527587265841
+Best n_estimators: 80
+
+
+     
